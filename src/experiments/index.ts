@@ -1,4 +1,5 @@
 import { ComponentType } from 'react';
+import Wireframe from './Wireframe';
 import WindSway from './WindSway';
 
 export type Experiment = {
@@ -8,4 +9,4 @@ export type Experiment = {
   Component: ComponentType;
 };
 
-export default [WindSway] as Experiment[];
+export default [Wireframe, WindSway] as Experiment[];
