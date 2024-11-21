@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
-import { Matrix4, MeshStandardMaterial, Vector3 } from 'three';
+import { useControls } from 'leva';
 import { useFrame } from '@react-three/fiber';
+import { Matrix4, MeshStandardMaterial, Vector3 } from 'three';
 import { InstancedUniformsMesh } from 'three-instanced-uniforms-mesh';
 
 import { GrassBladeMaterial } from './GrassBladeMaterial';
@@ -23,9 +24,32 @@ export class Grass {
   }
 
   Component = memo(() => {
-    useFrame((state) => (this.material.time = state.clock.elapsedTime));
+    useFrame((state) => this.material.setTime(state.clock.elapsedTime));
 
     return <primitive object={this.mesh} />;
+  });
+
+  Controls = memo(() => {
+    useControls({
+      'Description:': {
+        value: `
+Simple wind effect on grass using InstancedMesh and customized shaders.
+
+Double-click the plane to create grass.
+        `,
+        editable: false,
+      },
+      windStrength: {
+        label: 'Wind strength:',
+        value: 1,
+        min: 0,
+        max: 3,
+        step: 0.1,
+        onChange: this.material.setWindStrength,
+      },
+    });
+
+    return null;
   });
 
   populate = () => {

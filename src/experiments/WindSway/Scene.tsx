@@ -1,18 +1,22 @@
 import { MathUtils, Vector3 } from 'three';
 import { Canvas } from '@react-three/fiber';
 import { CameraControls, Grid, PerformanceMonitor } from '@react-three/drei';
+import { Leva } from 'leva';
 import { Perf } from 'r3f-perf';
 
 import { Grass } from './Grass';
 
 export function Scene() {
   return (
-    <Canvas shadows={true} camera={{ position: [5, 5, 10] }}>
-      <PerformanceMonitor>
-        <Contents />
-      </PerformanceMonitor>
-      <Perf position="top-left" showGraph={true} />
-    </Canvas>
+    <>
+      <Canvas shadows={true} camera={{ position: [5, 5, 10] }}>
+        <PerformanceMonitor>
+          <Contents />
+        </PerformanceMonitor>
+        <Perf position="top-left" showGraph={true} />
+      </Canvas>
+      <Leva flat titleBar={false} hideCopyButton oneLineLabels theme={{ sizes: { rootWidth: '300px' } }} />
+    </>
   );
 }
 
@@ -27,6 +31,7 @@ function Contents() {
       <spotLight position={[35, 35, 0]} angle={0.13} intensity={2000} castShadow={true} color="rgb(255, 255, 255)" />
       <Terrain onAddTree={grass.populate} />
       <grass.Component />
+      <grass.Controls />
     </>
   );
 }

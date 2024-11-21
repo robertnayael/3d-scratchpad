@@ -10,9 +10,13 @@ export class GrassBladeMaterial extends MeshStandardMaterial {
     uWindStrength: { value: 1.0 },
   };
 
-  set time(elapsedTime: number) {
-    this.uniforms.uTime.value = elapsedTime;
-  }
+  setTime = (value: number) => {
+    this.uniforms.uTime.value = value;
+  };
+
+  setWindStrength = (value: number) => {
+    this.uniforms.uWindStrength.value = value;
+  };
 
   constructor() {
     super({ side: DoubleSide });
