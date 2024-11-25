@@ -13,7 +13,7 @@ type RotationInfo = {
   /**
    * Camera-aligned X, Y and Z axes. Think the world basis rotated the same way as the camera.
    */
-  cameraAxis: Axes;
+  cameraAlignedBasis: Axes;
   rotation: Quaternion;
   rotationDelta: Quaternion;
 };
@@ -67,11 +67,19 @@ export function useObjectRotation<T extends Mesh | Group>({
 
     const rotationDelta = new Quaternion().multiplyQuaternions(
       new Quaternion().setFromAxisAngle(relativeX, screenDelta.y),
-      new Quaternion().setFromAxisAngle(relativeY, screenDelta.x),
+      new Quaternion().setFromAxisAngle(worldY, screenDelta.x),
     );
 
     rotation.premultiply(rotationDelta);
 
-    objectRef.current!.quaternion.set(...rotation.toArray());
+    onRotate?.({
+      cameraAlignedBasis: {
+        x: relativeX,
+        y: relativeY,
+        z: relativeZ,
+      },
+      rotation: rotation.clone(),
+      rotationDelta: rotationDelta.clone(),
+    });
   }) as () => T extends Mesh ? MeshProps : GroupProps; // https://github.com/pmndrs/use-gesture/issues/182#issuecomment-2477605945
 }
