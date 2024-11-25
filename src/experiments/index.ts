@@ -1,4 +1,5 @@
 import { ComponentType } from 'react';
+import CameraDependentObjectRotation from './CameraDependentObjectRotation';
 import Wireframe from './Wireframe';
 import WindSway from './WindSway';
 
@@ -9,4 +10,4 @@ export type Experiment = {
   Component: ComponentType;
 };
 
-export default [Wireframe, WindSway] as Experiment[];
+export default [CameraDependentObjectRotation, Wireframe, WindSway] as Experiment[];
