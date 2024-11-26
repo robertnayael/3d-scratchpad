@@ -1,0 +1,1 @@
+export { SurfaceStrandMaterial } from './SurfaceStrandMaterial';
