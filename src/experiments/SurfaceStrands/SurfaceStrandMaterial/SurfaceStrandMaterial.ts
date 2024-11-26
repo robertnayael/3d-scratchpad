@@ -1,4 +1,4 @@
-import { ColorRepresentation, DoubleSide, MeshLambertMaterial, MeshStandardMaterial, Quaternion } from 'three';
+import { ColorRepresentation, DoubleSide, MeshLambertMaterial, Quaternion } from 'three';
 
 import vertex from './SurfaceStrandMaterial.vertex.glsl';
 import fragment from './SurfaceStrandMaterial.fragment.glsl';

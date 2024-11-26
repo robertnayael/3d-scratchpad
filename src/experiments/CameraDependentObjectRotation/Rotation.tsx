@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { BoxGeometry, Mesh, MeshNormalMaterial, TorusKnotGeometry } from 'three';
+import { Mesh, MeshNormalMaterial, TorusKnotGeometry } from 'three';
 import { useObjectRotation } from './useObjectRotation';
 
 export function Rotation({ onRotationStateChanged }: { onRotationStateChanged: (rotating: boolean) => void }) {
@@ -16,7 +16,7 @@ export function Rotation({ onRotationStateChanged }: { onRotationStateChanged: (
 
   return (
     <>
-      <mesh position={[1, 1, 1]} geometry={geo} material={mat} {...bind()} ref={meshRef} />
+      <mesh position={[0, 0, 0]} geometry={geo} material={mat} {...bind()} ref={meshRef} />
     </>
   );
 }
