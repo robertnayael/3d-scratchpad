@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
 import CameraDependentObjectRotation from './CameraDependentObjectRotation';
 import SurfaceStrands from './SurfaceStrands';
+import VectorFieldFlow from './VectorFieldFlow';
 import Wireframe from './Wireframe';
 import WindSway from './WindSway';
 
@@ -11,4 +12,4 @@ export type Experiment = {
   Component: ComponentType;
 };
 
-export default [CameraDependentObjectRotation, SurfaceStrands, Wireframe, WindSway] as Experiment[];
+export default [CameraDependentObjectRotation, SurfaceStrands, VectorFieldFlow, Wireframe, WindSway] as Experiment[];
