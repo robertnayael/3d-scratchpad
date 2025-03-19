@@ -1,5 +1,6 @@
 import { ComponentType } from 'react';
 import CameraDependentObjectRotation from './CameraDependentObjectRotation';
+import AnimatedGoldbergPolyhedron from './AnimatedGoldbergPolyhedron';
 import SurfaceStrands from './SurfaceStrands';
 import VectorFieldFlow from './VectorFieldFlow';
 import Wireframe from './Wireframe';
@@ -12,4 +13,11 @@ export type Experiment = {
   Component: ComponentType;
 };
 
-export default [CameraDependentObjectRotation, SurfaceStrands, VectorFieldFlow, Wireframe, WindSway] as Experiment[];
+export default [
+  AnimatedGoldbergPolyhedron,
+  CameraDependentObjectRotation,
+  SurfaceStrands,
+  VectorFieldFlow,
+  Wireframe,
+  WindSway,
+] as Experiment[];

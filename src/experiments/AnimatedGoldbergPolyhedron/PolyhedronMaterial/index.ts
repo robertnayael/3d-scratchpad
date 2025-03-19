@@ -1,0 +1,1 @@
+export { PolyhedronMaterial } from './PolyhedronMaterial';
