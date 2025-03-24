@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { Leva } from 'leva';
 import { Perf } from 'r3f-perf';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
-import { CameraControls, Grid, PerformanceMonitor, Reflector } from '@react-three/drei';
+import { CameraControls, Grid, MeshReflectorMaterial, PerformanceMonitor } from '@react-three/drei';
 import { Polyhedron } from './Polyhedron';
 
 export function Scene() {
@@ -36,21 +36,21 @@ function Contents() {
       <spotLight position={[35, 35, 35]} angle={0.13} intensity={20000} castShadow={true} color="rgb(255, 255, 255)" />
       <Polyhedron />
 
-      <Reflector
-        blur={[512, 512]}
-        mixBlur={1}
-        mixStrength={1}
-        resolution={2048}
-        args={[10, 10]}
-        rotation={[-Math.PI * 0.5, 0, 0]}
-        position={[0, -1.25, 0]}
-        mirror={1}
-        minDepthThreshold={0.75}
-        maxDepthThreshold={0.95}
-        depthScale={1}
-      >
-        {(Material, props) => <Material metalness={0.5} roughness={1} color={'rgb(70, 70, 70)'} {...props} />}
-      </Reflector>
+      <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -1.25, 0]}>
+        <planeGeometry args={[10, 10]} />
+        <MeshReflectorMaterial
+          blur={2048}
+          mixBlur={1}
+          mixStrength={0.2}
+          mixContrast={1}
+          resolution={2048}
+          mirror={1}
+          depthScale={1}
+          depthToBlurRatioBias={0.25}
+          distortion={1}
+          reflectorOffset={0.1}
+        />
+      </mesh>
 
       <EffectComposer>
         <Bloom mipmapBlur={true} luminanceThreshold={0.2} radius={0.5} intensity={1.9} />
