@@ -1,60 +1,87 @@
-import { Canvas } from '@react-three/fiber';
-import { Leva } from 'leva';
-import { Perf } from 'r3f-perf';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
-import { CameraControls, Grid, MeshReflectorMaterial, PerformanceMonitor } from '@react-three/drei';
+import { useEffect } from 'react';
+import { Leva, useControls } from 'leva';
+import { float, mrt, output, pass } from 'three/tsl';
+import { CameraControls, Stats } from '@react-three/drei';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { WebGPUCanvas } from './WebGPUCanvas';
+import { usePostprocessing } from './usePostprocessing';
 import { Polyhedron } from './Polyhedron';
 
 export function Scene() {
   return (
     <>
-      <Canvas shadows={true} camera={{ position: [1.25, 0.01, 1.25], fov: 100 }}>
-        <PerformanceMonitor>
-          <Contents />
-        </PerformanceMonitor>
-        <Perf position="top-left" showGraph={true} />
-      </Canvas>
-      <Leva flat titleBar={false} hideCopyButton oneLineLabels theme={{ sizes: { rootWidth: '300px' } }} />
+      <WebGPUCanvas shadows={'variance'} camera={{ position: [1.25, 0.01, 1.25], fov: 100 }} background={0x333333}>
+        <Stats showPanel={0} />
+        <Contents />
+      </WebGPUCanvas>
+      <Leva flat titleBar={false} hideCopyButton oneLineLabels={false} theme={{ sizes: { rootWidth: '400px' } }} />
     </>
   );
 }
 
 function Contents() {
+  const postProcessing = usePostprocessing((scene, camera, postProcessing) => {
+    const scenePass = pass(scene, camera);
+    scenePass.setMRT(
+      mrt({
+        output,
+        bloomIntensity: float(0),
+      }),
+    );
+
+    const outputPass = scenePass.getTextureNode();
+    const bloomIntensityPass = scenePass.getTextureNode('bloomIntensity');
+    const bloomPass = bloom(outputPass.mul(bloomIntensityPass), 0, 0, 0);
+    postProcessing.outputNode = outputPass.add(bloomPass).renderOutput();
+
+    return {
+      bloomPass,
+    };
+  });
+
+  const settings = {
+    bloom: useControls('Bloom', {
+      strength: {
+        label: 'strength',
+        value: 0.3,
+        min: 0,
+        max: 5,
+        step: 0.01,
+      },
+      radius: {
+        label: 'radius',
+        value: 0,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+    }),
+  };
+
+  useEffect(() => {
+    if (!postProcessing) return;
+    postProcessing.bloomPass.strength.value = settings.bloom.strength;
+    postProcessing.bloomPass.radius.value = settings.bloom.radius;
+  }, [settings.bloom, postProcessing]);
+
   return (
     <>
-      <CameraControls minPolarAngle={1.6} maxPolarAngle={1.6} />
-      <Grid
-        position={[0, 0, 0]}
-        infiniteGrid
-        fadeDistance={20}
-        cellColor={'#ffffff'}
-        sectionThickness={0.5}
-        cellSize={0.1}
-        visible={false}
+      <CameraControls /*minPolarAngle={1.6} maxPolarAngle={1.6}*/ />
+      <ambientLight intensity={0.1} />
+      <spotLight
+        position={[5, 5, 5]}
+        angle={Math.PI / 20}
+        intensity={400}
+        castShadow={true}
+        shadow-camera-near={7}
+        shadow-camera-far={10}
+        shadow-blurSamples={20}
+        shadow-radius={10}
+        // shadow-bias={-0.025}
+        // shadow-mapSize={[2048, 2048]}
+        color="rgb(255, 255, 255)"
       />
-      <ambientLight intensity={0.3} />
-      <spotLight position={[35, 35, 35]} angle={0.13} intensity={20000} castShadow={true} color="rgb(255, 255, 255)" />
       <Polyhedron />
-
-      <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -1.25, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <MeshReflectorMaterial
-          blur={2048}
-          mixBlur={1}
-          mixStrength={0.2}
-          mixContrast={1}
-          resolution={2048}
-          mirror={1}
-          depthScale={1}
-          depthToBlurRatioBias={0.25}
-          distortion={1}
-          reflectorOffset={0.1}
-        />
-      </mesh>
-
-      <EffectComposer>
-        <Bloom mipmapBlur={true} luminanceThreshold={0.2} radius={0.5} intensity={1.9} />
-      </EffectComposer>
     </>
   );
 }

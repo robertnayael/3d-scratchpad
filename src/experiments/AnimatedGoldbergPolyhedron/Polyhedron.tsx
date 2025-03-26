@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { createGeometry } from './geometry';
-import { PolyhedronMaterial } from './PolyhedronMaterial';
 import { useFrame } from '@react-three/fiber';
+import { createGeometry } from './geometry';
+import { createPolyhedronMaterial } from './PolyhedronNodeMaterial';
 
 export function Polyhedron(): React.ReactNode {
   const [geometry] = useState(createGeometry());
-  const [material] = useState(new PolyhedronMaterial());
+  const [m] = useState(createPolyhedronMaterial());
 
   useFrame(({ clock }) => {
-    material.setTime(clock.getElapsedTime());
+    m.setTime(clock.getElapsedTime());
   });
 
   return (
     <>
-      <mesh geometry={geometry} material={material} />
-      <mesh>
+      <mesh geometry={geometry} material={m.material} castShadow receiveShadow />
+      <mesh castShadow>
         <sphereGeometry />
-        <meshStandardMaterial color="black" />
+        <meshBasicMaterial color={0x000000} />
       </mesh>
     </>
   );
