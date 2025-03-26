@@ -13,7 +13,7 @@ export function WebGPUCanvas(canvasProps: CanvasProps & { background?: THREE.Col
         extend(THREE as any);
         const renderer = new THREE.WebGPURenderer({
           ...(props as ConstructorParameters<typeof THREE.WebGPURenderer>[0]),
-          antialias: true,
+          antialias: false,
           forceWebGL: false,
         });
         if (canvasProps.background) {

@@ -3,6 +3,7 @@ import { Leva, useControls } from 'leva';
 import { float, mrt, output, pass } from 'three/tsl';
 import { CameraControls, Stats } from '@react-three/drei';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { smaa } from 'three/addons/tsl/display/SMAANode.js';
 import { WebGPUCanvas } from './WebGPUCanvas';
 import { usePostprocessing } from './usePostprocessing';
 import { Polyhedron } from './Polyhedron';
@@ -30,9 +31,10 @@ function Contents() {
     );
 
     const outputPass = scenePass.getTextureNode();
+    const smaaPass = smaa(outputPass);
     const bloomIntensityPass = scenePass.getTextureNode('bloomIntensity');
-    const bloomPass = bloom(outputPass.mul(bloomIntensityPass), 0, 0, 0);
-    postProcessing.outputNode = outputPass.add(bloomPass).renderOutput();
+    const bloomPass = bloom(smaaPass.mul(bloomIntensityPass), 0, 0, 0);
+    postProcessing.outputNode = smaaPass.add(bloomPass).renderOutput();
 
     return {
       bloomPass,
