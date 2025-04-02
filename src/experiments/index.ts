@@ -5,6 +5,7 @@ import SurfaceStrands from './SurfaceStrands';
 import VectorFieldFlow from './VectorFieldFlow';
 import Wireframe from './Wireframe';
 import WindSway from './WindSway';
+import RenderToTexture from './RenderToTexture';
 
 export type Experiment = {
   title: string;
@@ -20,4 +21,5 @@ export default [
   VectorFieldFlow,
   Wireframe,
   WindSway,
+  RenderToTexture,
 ] as Experiment[];
