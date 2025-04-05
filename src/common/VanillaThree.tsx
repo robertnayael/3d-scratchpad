@@ -1,4 +1,4 @@
-import { EffectCallback, useEffect, useRef } from 'react';
+import { EffectCallback, useEffect, useRef, useState } from 'react';
 
 export default useEffectOnce;
 
@@ -41,6 +41,7 @@ export namespace VanillaThree {
     const container = useRef<HTMLDivElement>(null);
     const viewportChangeHandler = useRef<ViewportChangeHandler>(null);
     const cleanupHandler = useRef<CleanUpHandler>(() => {});
+    const [error, setError] = useState<Error | null>(null);
 
     useEffectOnce(() => {
       if (initializerHasRun.current) return;
@@ -60,7 +61,10 @@ export namespace VanillaThree {
           pixelRatio: window.devicePixelRatio,
         });
 
-      initialization.then(notifyViewportChange);
+      initialization.then(notifyViewportChange).catch((error) => {
+        console.error(error);
+        setError(error);
+      });
       window.addEventListener('resize', notifyViewportChange);
 
       return () => {
@@ -69,7 +73,12 @@ export namespace VanillaThree {
       };
     });
 
-    return <div ref={container} />;
+    return (
+      <>
+        {!!error && <ErrorInfo />}
+        <div ref={container} className="three-canvas" style={{ display: !!error ? 'none' : 'block' }} />
+      </>
+    );
   }
 
   export const Component = ThreeCanvasComponent;
@@ -106,4 +115,12 @@ function useEffectOnce(effect: EffectCallback) {
       }
     };
   }, []);
+}
+
+function ErrorInfo() {
+  return (
+    <div style={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+      <p>Something went wrong 😣</p>
+    </div>
+  );
 }
