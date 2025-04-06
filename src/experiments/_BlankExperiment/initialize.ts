@@ -1,23 +1,30 @@
 import { Scene, WebGPURenderer } from 'three/webgpu';
 import { VanillaThree } from '@/common';
-import { sceneContents } from './scene/contents';
-import { sceneLights } from './scene/lights';
+import { initializeSettings } from './settings';
+import { setupContents } from './scene/contents';
 import { setupPostProcessing } from './postProcessing';
 import { setupControls } from './controls';
 import { setupCamera } from './camera';
+import { setStore } from './store';
 
 export const initialize: VanillaThree.Initializer = async ({ domContainer, handleViewportChange, handleCleanup }) => {
   const renderer = await new WebGPURenderer({ antialias: false, forceWebGL: true }).init();
   domContainer.appendChild(renderer.domElement);
 
-  const camera = setupCamera();
-  const controls = setupControls(camera, renderer);
+  const { onSettingsChange, disposeSettingsGui } = initializeSettings();
 
-  const scene = new Scene();
-  const { animation } = sceneContents(scene);
-  sceneLights(scene);
+  const { camera } = setStore({
+    renderer,
+    onSettingsChange,
+    camera: setupCamera(),
+    scene: new Scene(),
+  });
 
-  const postProcessing = setupPostProcessing(renderer, scene, camera);
+  const controls = setupControls();
+
+  const { animation } = setupContents();
+
+  const postProcessing = setupPostProcessing();
 
   renderer.setAnimationLoop((deltaTime) => {
     controls.update(deltaTime);
@@ -34,5 +41,6 @@ export const initialize: VanillaThree.Initializer = async ({ domContainer, handl
 
   handleCleanup(() => {
     renderer.dispose();
+    disposeSettingsGui();
   });
 };

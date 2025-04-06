@@ -1,6 +1,9 @@
-import { AmbientLight, DirectionalLight, Scene } from 'three/webgpu';
+import { AmbientLight, DirectionalLight } from 'three/webgpu';
+import { getStore } from '../store';
 
-export function sceneLights(scene: Scene) {
+export function setupLights() {
+  const { scene } = getStore();
+
   const lights = {
     directional: new DirectionalLight(),
     ambient: new AmbientLight(),

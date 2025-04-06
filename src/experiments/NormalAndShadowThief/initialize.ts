@@ -1,6 +1,6 @@
 import { PCFSoftShadowMap, Scene, WebGPURenderer } from 'three/webgpu';
 import { VanillaThree } from '@/common';
-import { setStore } from './store';
+import { disposeStore, setStore } from './store';
 import { sceneContents } from './scene/contents';
 import { setupPostProcessing } from './postProcessing';
 import { setupControls } from './controls';
@@ -44,6 +44,7 @@ export const initialize: VanillaThree.Initializer = async ({ domContainer, handl
 
   handleCleanup(() => {
     renderer.dispose();
+    disposeStore();
     disposeSettingsGui();
   });
 

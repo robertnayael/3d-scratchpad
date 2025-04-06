@@ -1,8 +1,8 @@
 import { PostProcessing } from 'three/webgpu';
 import { pass } from 'three/tsl';
-import { getStore } from './store';
 import { smaa } from 'three/examples/jsm/tsl/display/SMAANode.js';
 import { bloom } from 'three/examples/jsm/tsl/display/BloomNode.js';
+import { getStore } from './store';
 
 export function setupPostProcessing() {
   const { renderer, scenes, camera, onSettingsChange } = getStore();

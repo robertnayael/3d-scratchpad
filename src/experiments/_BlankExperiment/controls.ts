@@ -1,8 +1,10 @@
-import { Camera, Renderer } from 'three/webgpu';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TrackballControls } from 'three/addons/controls/TrackballControls.js';
+import { getStore } from './store';
 
-export function setupControls(camera: Camera, renderer: Renderer) {
+export function setupControls() {
+  const { camera, renderer, onSettingsChange } = getStore();
+
   // "Steal" zoom behavior from `TrackballControls` to enable smooth zoom,
   // as `OrbitControls` don't provide zoom smoothing even with damping enabled.
 
@@ -16,6 +18,11 @@ export function setupControls(camera: Camera, renderer: Renderer) {
   trackballControls.noRotate = true;
   trackballControls.noPan = true;
   trackballControls.noZoom = false;
+
+  onSettingsChange(({ controlsEnabled }) => {
+    orbitControls.enabled = controlsEnabled;
+    trackballControls.enabled = controlsEnabled;
+  });
 
   return {
     update: (deltaTime: number) => {

@@ -3,13 +3,10 @@ import { Renderer } from 'three/webgpu';
 import { OnSettingsChange } from './settings';
 
 export type Store = {
+  onSettingsChange: OnSettingsChange;
   renderer: Renderer;
   camera: PerspectiveCamera;
-  onSettingsChange: OnSettingsChange;
-  scenes: {
-    main: Scene;
-    proxy: Scene;
-  };
+  scene: Scene;
 };
 
 let CURRENT_STORE: Store | null = null;

@@ -1,6 +1,12 @@
-import { BoxGeometry, Mesh, MeshStandardNodeMaterial, Scene } from 'three/webgpu';
+import { BoxGeometry, Mesh, MeshStandardNodeMaterial } from 'three/webgpu';
+import { setupLights } from './lights';
+import { getStore } from '../store';
 
-export function sceneContents(scene: Scene) {
+export function setupContents() {
+  const { scene } = getStore();
+
+  setupLights();
+
   const cube = new Mesh();
   cube.geometry = new BoxGeometry();
   cube.material = new MeshStandardNodeMaterial({ color: 'orange' });
