@@ -1,6 +1,8 @@
 import {
   cameraWorldMatrix,
   faceDirection,
+  Fn,
+  If,
   mix,
   mrt,
   normalView,
@@ -58,17 +60,25 @@ import { getStore } from '../store';
  * As a result, we effectively avoid self-shadows and most importantly, make the object
  * receive smooth, rounded, "ideal" shadows. This also can be combined with the real world position
  * to avoid and effect which is too uncanny.
+ *
+ * There is one issue with this approach: when the camera gets very close and the main object is still
+ * visible, but the proxy one not, there's nothing to steal. The ideal solution would be
+ * to use a modified, zoomed out camera for rendering the proxy scene and somehow modify
+ * the mapping of the resulting texture to proxy receiver fragments. Here, a simpler approach is used:
+ * if that happens, we just fall back to the standard values for normals and shadow positions.
  */
 export async function proxyReceiverMaterial() {
   const { scenes, camera, onSettingsChange } = getStore();
+
+  /*--- UNIFORMS ---*/
 
   const normalStealStrength = uniform(0.95);
   const shadowStealStrength = uniform(0.8);
   const showNormals = uniform(0);
   const fixBacksideNormals = uniform(1);
 
-  const diffuseColor = vec3(0.337, 0.443, 0.0);
-  const errorColor = vec3(1, 0, 1);
+  const showProxyMisses = uniform(0); // toggle manually to test if proxy is big enough
+  const diffuseColor = vec3(0.337, 0.443, 0.0).toVar();
 
   onSettingsChange((settings) => {
     normalStealStrength.value = settings.normalStealStrength;
@@ -98,6 +108,8 @@ export async function proxyReceiverMaterial() {
 
   const backsideNormalsFix = select(fixBacksideNormals, faceDirection, 1);
 
+  /*--- NORMAL STEALING ---*/
+
   // Steal proxy's normal:
   const proxyNormalViewTex = rtt(proxyPass.getTextureNode('normal'));
   proxyNormalViewTex.uvNode = viewportUV;
@@ -110,7 +122,13 @@ export async function proxyReceiverMaterial() {
 
   // Mix stolen normal with regular one:
   const fakeNormalView = mix(standardNormalView, proxyNormalView, normalStealStrength);
-  material.normalNode = fakeNormalView;
+
+  // Apply faked normal, or use default if proxy value not available (camera too close)
+  const proxyNormalMissing = proxyNormalView.xyz.length().equal(0);
+  const finalNormalView = select(proxyNormalMissing, standardNormalView, fakeNormalView);
+  material.normalNode = finalNormalView;
+
+  /*--- SHADOW POSITION STEALING ---*/
 
   // Steal proxy's world position
   const proxyPositionWorld = rtt(proxyPass.getTextureNode('output')).label('proxyPositionWorld');
@@ -118,19 +136,38 @@ export async function proxyReceiverMaterial() {
 
   // Mix proxy's position with regular position for shadow reception:
   const fakeWorldPosition = mix(positionWorld, proxyPositionWorld.xyz, shadowStealStrength);
-  const proxyPositionMissing = proxyPositionWorld.xyz.length().equal(0);
-  material.shadowPositionNode = fakeWorldPosition;
 
-  // Idle animation
+  // Apply faked world pos, or use default if proxy value not available (camera too close)
+  const proxyPositionMissing = proxyPositionWorld.xyz.length().equal(0);
+  material.shadowPositionNode = select(proxyPositionMissing, positionWorld, fakeWorldPosition);
+
+  /*--- IDLE ANIMATION ---*/
+
   const displace = cnoise(vec4(positionWorld.mul(2), time))
     .mul(0.05)
     .add(0.95);
   material.positionNode = positionGeometry.mul(displace);
 
-  // Highlight proxy texture misses with special color; Optionally visualize current normals; .
-  const fakeNormalWorld = cameraWorldMatrix.transformDirection(fakeNormalView.mul(faceDirection)).xyz;
-  const color = select(proxyPositionMissing, errorColor, diffuseColor);
-  material.colorNode = mix(color, fakeNormalWorld, showNormals);
+  /*--- COLOR ---*/
+
+  material.colorNode = Fn(() => {
+    const color = diffuseColor.toVar();
+
+    // Debug: visualize final normals
+    If(showNormals.equal(1), () => {
+      const fakeNormalWorld = cameraWorldMatrix.transformDirection(finalNormalView.mul(faceDirection)).xyz;
+      color.rgb.assign(fakeNormalWorld);
+    });
+
+    // Debug: show proxy texture misses in purple; otherwise white
+    If(showProxyMisses.equal(1), () => {
+      const okColor = vec3(1, 1, 1);
+      const errorColor = vec3(1, 0, 1);
+      color.rgb.assign(select(proxyPositionMissing.or(proxyNormalMissing), errorColor, okColor));
+    });
+
+    return color;
+  })();
 
   return material;
 }
